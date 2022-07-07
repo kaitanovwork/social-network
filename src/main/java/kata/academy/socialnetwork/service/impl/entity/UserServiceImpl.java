@@ -5,8 +5,12 @@ import kata.academy.socialnetwork.model.enums.RoleName;
 import kata.academy.socialnetwork.repository.abst.entity.UserRepository;
 import kata.academy.socialnetwork.service.abst.entity.RoleService;
 import kata.academy.socialnetwork.service.abst.entity.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserServiceImpl extends AbstractServiceImpl<User, Long> implements UserService {
@@ -38,5 +42,10 @@ public class UserServiceImpl extends AbstractServiceImpl<User, Long> implements 
     @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public Page<User> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 }
