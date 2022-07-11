@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -46,9 +47,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    private String firstName;
-
-    private String lastName;
+    @Embedded
+    private UserInfo userInfo;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
