@@ -1,5 +1,6 @@
 package kata.academy.socialnetwork.model.entity;
 
+import kata.academy.socialnetwork.model.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,11 +20,6 @@ public class UserInfo {
     private String city;
     private Integer age;
     private Gender gender;
-
-    public enum Gender {
-        MALE,
-        FEMALE
-    }
 
 
 }
