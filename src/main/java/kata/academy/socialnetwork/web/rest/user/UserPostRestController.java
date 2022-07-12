@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kata.academy.socialnetwork.model.api.Response;
+import kata.academy.socialnetwork.model.converter.PostMapper;
+import kata.academy.socialnetwork.model.dto.response.user.PostResponseDto;
 import kata.academy.socialnetwork.model.entity.Post;
 import kata.academy.socialnetwork.service.abst.entity.PostService;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +32,8 @@ public class UserPostRestController {
             @ApiResponse(responseCode = "400", description = "Клиент допустил ошибки в запросе")
     })
     @GetMapping
-    public Response<Page<Post>> getPostPage(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+    public Response<Page<PostResponseDto>> getPostPage(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         Page<Post> posts = postService.findAll(pageable);
-        return Response.ok(posts);
+        return Response.ok(posts.map(PostMapper::toDto));
     }
 }
