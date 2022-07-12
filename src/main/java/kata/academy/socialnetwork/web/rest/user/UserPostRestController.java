@@ -47,7 +47,7 @@ public class UserPostRestController {
             @ApiResponse(responseCode = "200", description = "Количество лайков успешно получено"),
             @ApiResponse(responseCode = "400", description = "Клиент допустил ошибки в запросе")
     })
-    @PostMapping("/{postId}/postlike/count")
+    @GetMapping("/{postId}/postlike/count")
     public Response<Integer> getPostLikeCount(@PathVariable Long postId, @RequestParam("positive") Boolean positive) {
         Integer count = postLikeService.countPostLikesByIdAndPositive(postId, positive);
         return Response.ok(count);
