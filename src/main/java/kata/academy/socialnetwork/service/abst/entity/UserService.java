@@ -13,4 +13,6 @@ public interface UserService extends AbstractService<User, Long> {
     boolean existsByEmail(String email);
 
     Page<User> findAll(Pageable pageable);
+
+    User findByEmail(String email);
 }

@@ -5,6 +5,7 @@ import kata.academy.socialnetwork.model.dto.request.user.UserUpdatePasswordReque
 import kata.academy.socialnetwork.model.dto.request.user.UserUpdateRequestDto;
 import kata.academy.socialnetwork.model.dto.response.user.UserResponseDto;
 import kata.academy.socialnetwork.model.entity.User;
+import kata.academy.socialnetwork.model.entity.UserInfo;
 
 public final class UserMapper {
 
@@ -12,8 +13,12 @@ public final class UserMapper {
         User user = new User();
         user.setEmail(dto.email());
         user.setPassword(dto.password());
-        user.setFirstName(dto.firstName());
-        user.setLastName(dto.lastName());
+
+        UserInfo userInfo = new UserInfo();
+        userInfo.setFirstName(dto.firstName());
+        userInfo.setLastName(dto.lastName());
+
+        user.setUserInfo(userInfo);
         return user;
     }
 
@@ -21,14 +26,14 @@ public final class UserMapper {
         return new UserResponseDto(
                 user.getId(),
                 user.getEmail(),
-                user.getFirstName(),
-                user.getLastName()
+                user.getUserInfo().getFirstName(),
+                user.getUserInfo().getLastName()
         );
     }
 
     public static User updateUser(User user, UserUpdateRequestDto dto) {
-        user.setFirstName(dto.firstName());
-        user.setLastName(dto.lastName());
+        user.getUserInfo().setFirstName(dto.firstName());
+        user.getUserInfo().setLastName(dto.lastName());
         return user;
     }
 
