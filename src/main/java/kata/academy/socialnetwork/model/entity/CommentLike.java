@@ -13,13 +13,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.Objects;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "comment_likes")
+@Table(name = "commentlikes")
 public class CommentLike {
 
     @Id
@@ -44,9 +45,9 @@ public class CommentLike {
         CommentLike that = (CommentLike) o;
 
         if (positive != that.positive) return false;
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
-        if (comment != null ? !comment.equals(that.comment) : that.comment != null) return false;
-        return user != null ? user.equals(that.user) : that.user == null;
+        if (!Objects.equals(id, that.id)) return false;
+        if (!Objects.equals(comment, that.comment)) return false;
+        return Objects.equals(user, that.user);
     }
 
     @Override
