@@ -20,7 +20,7 @@ import java.io.Serializable;
 @Setter
 @Entity
 @Table(name = "comment_likes")
-public class CommentLike implements Serializable {
+public class CommentLike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,13 +28,12 @@ public class CommentLike implements Serializable {
 
     private boolean positive;
 
-    @Id
     @OneToOne
-    @JoinColumn(name = "comment_id", referencedColumnName = "id")
+    @JoinColumn(name = "comment_id", referencedColumnName = "id", nullable = false)
     private Comment comment;
 
     @OneToOne()
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
     @Override
