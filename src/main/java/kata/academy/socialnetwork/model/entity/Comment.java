@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -39,11 +40,11 @@ public class Comment {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Comment comment = (Comment) o;
-        return Objects.equals(text, comment.text);
+        return Objects.equals(id, comment.id) && Objects.equals(text, comment.text) && Objects.equals(user, comment.user);
     }
 
     @Override
     public int hashCode() {
-        return text != null ? text.hashCode() : 0;
+        return Objects.hash(id, text, user);
     }
 }

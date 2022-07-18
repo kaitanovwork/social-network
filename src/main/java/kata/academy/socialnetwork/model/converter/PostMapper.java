@@ -6,6 +6,7 @@ import kata.academy.socialnetwork.model.entity.Post;
 import kata.academy.socialnetwork.model.entity.User;
 
 public final class PostMapper {
+
     public static PostResponseDto toDto(Post post) {
         return new PostResponseDto(
                 post.getId(),
@@ -16,18 +17,11 @@ public final class PostMapper {
         );
     }
 
-    public static Post toEntity(PostPersistRequestDto dto) {
+    public static Post toEntity(PostPersistRequestDto dto, User user) {
         Post post = new Post();
-
         post.setTitle(dto.title());
         post.setText(dto.text());
         post.setTags(dto.tags());
-
-        return post;
-    }
-
-    public static Post toEntity(PostPersistRequestDto dto, User user) {
-        Post post = toEntity(dto);
         post.setUser(user);
         return post;
     }
