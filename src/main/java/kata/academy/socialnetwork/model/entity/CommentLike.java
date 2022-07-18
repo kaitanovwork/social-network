@@ -12,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import java.io.Serializable;
 import java.util.Objects;
 
 @AllArgsConstructor
@@ -20,7 +19,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-@Table(name = "commentlikes")
+@Table(name = "comment_likes")
 public class CommentLike {
 
     @Id
@@ -33,7 +32,7 @@ public class CommentLike {
     @JoinColumn(name = "comment_id", referencedColumnName = "id", nullable = false)
     private Comment comment;
 
-    @OneToOne()
+    @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
@@ -41,22 +40,13 @@ public class CommentLike {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         CommentLike that = (CommentLike) o;
-
-        if (positive != that.positive) return false;
-        if (!Objects.equals(id, that.id)) return false;
-        if (!Objects.equals(comment, that.comment)) return false;
-        return Objects.equals(user, that.user);
+        return positive == that.positive && Objects.equals(id, that.id) && Objects.equals(comment, that.comment) && Objects.equals(user, that.user);
     }
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (positive ? 1 : 0);
-        result = 31 * result + (comment != null ? comment.hashCode() : 0);
-        result = 31 * result + (user != null ? user.hashCode() : 0);
-        return result;
+        return Objects.hash(id, positive, comment, user);
     }
 }
 

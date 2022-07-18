@@ -11,22 +11,19 @@ public final class UserMapper {
 
     public static User toEntity(UserPersistRequestDto dto) {
         User user = new User();
-        UserInfo userInfo = new UserInfo();
         user.setEmail(dto.email());
         user.setPassword(dto.password());
-        userInfo.setFirstName(dto.firstName());
-        userInfo.setLastName(dto.lastName());
-        userInfo.setCity(dto.city());
-        userInfo.setAge(dto.age());
-        userInfo.setGender(dto.gender());
-        user.setUserInfo(userInfo);
+        user.setUserInfo(new UserInfo(
+                dto.firstName(),
+                dto.lastName(),
+                dto.city(),
+                dto.age(),
+                dto.gender()
+        ));
         return user;
     }
 
-
-
     public static UserResponseDto toDto(User user) {
-
         return new UserResponseDto(
                 user.getId(),
                 user.getEmail(),
@@ -35,18 +32,17 @@ public final class UserMapper {
                 user.getUserInfo().getCity(),
                 user.getUserInfo().getAge(),
                 user.getUserInfo().getGender()
-
         );
     }
 
     public static User updateUser(User user, UserUpdateRequestDto dto) {
-        UserInfo userInfo = user.getUserInfo();
-        userInfo.setFirstName(dto.firstName());
-        userInfo.setLastName(dto.lastName());
-        userInfo.setCity(dto.city());
-        userInfo.setAge(dto.age());
-        userInfo.setGender(dto.gender());
-        user.setUserInfo(userInfo);
+        user.setUserInfo(new UserInfo(
+                dto.firstName(),
+                dto.lastName(),
+                dto.city(),
+                dto.age(),
+                dto.gender()
+        ));
         return user;
     }
 
