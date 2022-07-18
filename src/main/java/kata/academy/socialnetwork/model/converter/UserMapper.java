@@ -11,29 +11,42 @@ public final class UserMapper {
 
     public static User toEntity(UserPersistRequestDto dto) {
         User user = new User();
+        UserInfo userInfo = new UserInfo();
         user.setEmail(dto.email());
         user.setPassword(dto.password());
-
-        UserInfo userInfo = new UserInfo();
         userInfo.setFirstName(dto.firstName());
         userInfo.setLastName(dto.lastName());
-
+        userInfo.setCity(dto.city());
+        userInfo.setAge(dto.age());
+        userInfo.setGender(dto.gender());
         user.setUserInfo(userInfo);
         return user;
     }
 
+
+
     public static UserResponseDto toDto(User user) {
+
         return new UserResponseDto(
                 user.getId(),
                 user.getEmail(),
                 user.getUserInfo().getFirstName(),
-                user.getUserInfo().getLastName()
+                user.getUserInfo().getLastName(),
+                user.getUserInfo().getCity(),
+                user.getUserInfo().getAge(),
+                user.getUserInfo().getGender()
+
         );
     }
 
     public static User updateUser(User user, UserUpdateRequestDto dto) {
-        user.getUserInfo().setFirstName(dto.firstName());
-        user.getUserInfo().setLastName(dto.lastName());
+        UserInfo userInfo = user.getUserInfo();
+        userInfo.setFirstName(dto.firstName());
+        userInfo.setLastName(dto.lastName());
+        userInfo.setCity(dto.city());
+        userInfo.setAge(dto.age());
+        userInfo.setGender(dto.gender());
+        user.setUserInfo(userInfo);
         return user;
     }
 
