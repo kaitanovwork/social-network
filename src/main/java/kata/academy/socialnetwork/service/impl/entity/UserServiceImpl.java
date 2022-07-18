@@ -48,4 +48,9 @@ public class UserServiceImpl extends AbstractServiceImpl<User, Long> implements 
     public Page<User> findAll(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
 }
