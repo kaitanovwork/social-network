@@ -14,7 +14,12 @@ public class CommentLikeServiceImpl extends AbstractServiceImpl<CommentLike, Lon
     }
 
     @Override
-    public Integer countPostLikesByIdAndPositive(Long postId, Boolean positive) {
-        return commentLikeRepository.countPostLikesByIdAndPositive(postId, positive);
+    public Integer countCommentLikesByIdAndPositive(Long commentId, Boolean positive) {
+        return commentLikeRepository.countCommentLikesByIdAndPositive(commentId, positive);
+    }
+
+    @Override
+    public boolean existsByCommentIdAndUserId(Long commentId, Long userId) {
+        return commentLikeRepository.existsByCommentIdAndUserId(commentId, userId);
     }
 }

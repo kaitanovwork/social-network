@@ -20,4 +20,7 @@ public class CommentServiceImpl extends AbstractServiceImpl<Comment, Long> imple
         return commentRepository.findAll(pageable);
     }
 
+
+
+
 }

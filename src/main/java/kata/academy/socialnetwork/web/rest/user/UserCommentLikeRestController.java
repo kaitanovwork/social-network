@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.Positive;
 import java.util.List;
-import java.util.Optional;
+
 
 
 @Tag(name = "UserCommentLikeRestController", description = "Контроллер для работы с лайками комментов")
@@ -36,68 +36,61 @@ public class UserCommentLikeRestController {
     private final CommentLikeService commentLikeService;
     private final CommentService commentService;
 
+
+
     @Operation(summary = "Эндпоинт для получения количества лайков коммента")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Количество лайков успешно получено"),
             @ApiResponse(responseCode = "400", description = "Клиент допустил ошибки в запросе")
     })
-    @GetMapping("/{commId}/count")
-    public Response<Integer> getCommentLikeCount(@PathVariable @Positive Long commId, @RequestParam("positive") Boolean positive) {
-        ApiValidationUtil.requireTrue(commentService.existsById(commId), "Post not found");
-        return Response.ok(commentLikeService.countPostLikesByIdAndPositive(commId, positive));
+    @GetMapping("/{commentId}/count")
+    public Response<Integer> getCommentLikeCount(@PathVariable @Positive Long commentId, @RequestParam("positive") Boolean positive) {
+        ApiValidationUtil.requireTrue(commentService.existsById(commentId), "Comment not found");
+        return Response.ok(commentLikeService.countCommentLikesByIdAndPositive(commentId, positive));
     }
 
 
     @Operation(summary = "эндпоинт для добавления лайка или дизлайка комменту")
-    @PostMapping("/{commId}")
-    public void getCommentLikeChecker(@PathVariable @Positive Long commId, @RequestParam("positive") Boolean positive) {
+    @PostMapping("/{commentId}")
+    public void addLikeIfNotExist(@PathVariable @Positive Long commentId, @RequestParam("positive") Boolean positive) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(commentService.existsById(commId)) {
+        if (!commentLikeService.existsByCommentIdAndUserId(commentId, user.getId())) {
+
             CommentLike commentLike = new CommentLike();
-            Optional<Comment> optionalComment = commentService.findById(commId);
-            Comment comment = optionalComment.get();
-            List <CommentLike> likeList = commentLikeService.findAll();
-            if( likeList.stream().noneMatch(l -> l.getUser().equals(user) && l.getComment().equals(comment))){
-                commentLike.setComment(comment);
-                commentLike.setUser(user);
-                commentLike.setPositive(positive);
-                commentLikeService.save(commentLike);
-            }
+            Comment comment = commentService.findById(commentId).get();
+
+            commentLike.setComment(comment);
+            commentLike.setUser(user);
+            commentLike.setPositive(positive);
+            commentLikeService.save(commentLike);
 
         }
     }
 
     @Operation(summary = "эндпоинт для удаления лайка или дизлайка комменту")
-    @DeleteMapping("/{commId}")
-    public void getCommentLikeDeleter(@PathVariable @Positive Long commId, @RequestParam("positive") Boolean positive) {
+    @DeleteMapping("/{commentId}")
+    public void deleteLikeIfExist(@PathVariable @Positive Long commentId, @RequestParam("positive") Boolean positive) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(commentService.existsById(commId)) {
-            Optional<Comment> optionalComment = commentService.findById(commId);
-            Comment comment = optionalComment.get();
+        if (commentLikeService.existsByCommentIdAndUserId(commentId, user.getId())) {
+            Comment comment = commentService.findById(commentId).get();
             List <CommentLike> likeList = commentLikeService.findAll();
             likeList.stream()
-                    .filter(l -> l.getUser().equals(user))
-                    .filter(l -> l.getComment().equals(comment))
-                    .findFirst().ifPresent(commentLikeService::delete);
-
+                    .filter(l -> l.getUser().equals(user) && l.getComment().equals(comment))
+                    .forEach(commentLikeService::delete);
         }
     }
 
     @Operation(summary = "эндпоинт для обновления лайка или дизлайка комменту")
-    @PutMapping("/{commId}")
-    public void getCommentLikeUpdater(@PathVariable @Positive Long commId, @RequestParam("positive") Boolean positive) {
+    @PutMapping("/{commentId}")
+    public void updateLikeIfExist(@PathVariable @Positive Long commentId, @RequestParam("positive") Boolean positive) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(commentService.existsById(commId)) {
-            Optional<Comment> optionalComment = commentService.findById(commId);
-            Comment comment = optionalComment.get();
+        if( commentLikeService.existsByCommentIdAndUserId(commentId, user.getId())) {
+            Comment comment = commentService.findById(commentId).get();
             List <CommentLike> likeList = commentLikeService.findAll();
-            if( likeList.stream().anyMatch(l -> l.getUser().equals(user) && l.getComment().equals(comment))){
                 likeList.stream()
-                        .filter(l -> l.getUser().equals(user))
-                        .filter(l -> l.getComment().equals(comment))
+                        .filter(l -> l.getUser().equals(user) && l.getComment().equals(comment))
                         .peek(l -> l.setPositive(positive))
                         .forEach(commentLikeService::update);
-            }
 
         }
     }
