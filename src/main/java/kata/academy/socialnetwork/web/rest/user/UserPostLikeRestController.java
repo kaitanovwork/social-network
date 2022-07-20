@@ -43,11 +43,13 @@ public class UserPostLikeRestController {
             @ApiResponse(responseCode = "400", description = "Клиент допустил ошибки в запросе")
     })
     @PostMapping("/{postId}")
-    public Response<Void> setPostLikeOrDislike(@PathVariable @Positive Long postId, @RequestParam("positive") Boolean positive) {
-        User user = getUser();
-        Post post = getPost(postId);
-        ApiValidationUtil.requireNull(getPostLike(user, post), "Post like or dislike already exists");
-        postLikeService.save(new PostLike(0L, post, user, positive));
+    public Response<Void> addPostLike(@PathVariable @Positive Long postId, @RequestParam("positive") Boolean positive) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ApiValidationUtil.requireTrue(postService.existsById(postId), "Post not found");
+        Post post = postService.findById(postId).get();
+        PostLike postLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
+        ApiValidationUtil.requireNull(postLike, "Post like or dislike already exists");
+        postLikeService.save(new PostLike(null, post, user, positive));
         return Response.ok();
     }
 
@@ -57,10 +59,9 @@ public class UserPostLikeRestController {
             @ApiResponse(responseCode = "400", description = "Клиент допустил ошибки в запросе")
     })
     @DeleteMapping("/{postId}")
-    public Response<Void> deleteLikeOrDislike(@PathVariable @Positive Long postId) {
-        User user = getUser();
-        Post post = getPost(postId);
-        PostLike postLike = getPostLike(user, post);
+    public Response<Void> deletePostLike(@PathVariable @Positive Long postId) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        PostLike postLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
         ApiValidationUtil.requireNotNull(postLike, "Post like or dislike not found");
         postLikeService.delete(postLike);
         return Response.ok();
@@ -72,27 +73,13 @@ public class UserPostLikeRestController {
             @ApiResponse(responseCode = "400", description = "Клиент допустил ошибки в запросе")
     })
     @PutMapping("/{postId}")
-    public Response<Void> updateLikeOrDislike(@PathVariable @Positive Long postId, @RequestParam("positive") Boolean positive) {
-        User user = getUser();
-        Post post = getPost(postId);
-        PostLike postLike = getPostLike(user, post);
+    public Response<Void> updatePostLike(@PathVariable @Positive Long postId, @RequestParam("positive") Boolean positive) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ApiValidationUtil.requireTrue(postService.existsById(postId), "Post not found");
+        PostLike postLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
         ApiValidationUtil.requireNotNull(postLike, "Post like or dislike not found");
         postLike.setPositive(positive);
         postLikeService.save(postLike);
         return Response.ok();
     }
-
-    private User getUser() {
-        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
-
-    private Post getPost(Long postId) {
-        ApiValidationUtil.requireTrue(postService.existsById(postId), "Post not found");
-        return postService.findById(postId).get();
-    }
-
-    private PostLike getPostLike(User user, Post post) {
-        return postLikeService.findByPostAndUser(post, user);
-    }
-
 }

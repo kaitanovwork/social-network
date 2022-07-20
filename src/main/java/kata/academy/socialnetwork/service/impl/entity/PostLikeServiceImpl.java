@@ -1,8 +1,6 @@
 package kata.academy.socialnetwork.service.impl.entity;
 
-import kata.academy.socialnetwork.model.entity.Post;
 import kata.academy.socialnetwork.model.entity.PostLike;
-import kata.academy.socialnetwork.model.entity.User;
 import kata.academy.socialnetwork.repository.abst.entity.PostLikeRepository;
 import kata.academy.socialnetwork.service.abst.entity.PostLikeService;
 import org.springframework.stereotype.Service;
@@ -23,7 +21,7 @@ public class PostLikeServiceImpl extends AbstractServiceImpl<PostLike, Long> imp
     }
 
     @Override
-    public PostLike findByPostAndUser(Post post, User user) {
-        return postLikeRepository.findByPostAndUser(post, user);
+    public PostLike findByPostIdAndUserId(Long postId, Long userId) {
+        return postLikeRepository.findByPostIdAndUserId(postId, userId);
     }
 }
