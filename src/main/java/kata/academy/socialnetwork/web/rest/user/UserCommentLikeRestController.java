@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kata.academy.socialnetwork.model.api.Response;
-import kata.academy.socialnetwork.model.entity.Comment;
 import kata.academy.socialnetwork.model.entity.CommentLike;
 import kata.academy.socialnetwork.model.entity.User;
 import kata.academy.socialnetwork.service.abst.entity.CommentLikeService;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.Positive;
-import java.util.List;
 
 
 
@@ -51,49 +49,50 @@ public class UserCommentLikeRestController {
 
 
     @Operation(summary = "эндпоинт для добавления лайка или дизлайка комменту")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Лайк или дизлайк добавлен"),
+            @ApiResponse(responseCode = "400", description = "Клиент допустил ошибки в запросе")
+    })
     @PostMapping("/{commentId}")
-    public void addLikeIfNotExist(@PathVariable @Positive Long commentId, @RequestParam("positive") Boolean positive) {
+    public Response<Void> addLikeIfNotExist(@PathVariable @Positive Long commentId, @RequestParam("positive") Boolean positive) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!commentLikeService.existsByCommentIdAndUserId(commentId, user.getId())) {
-
-            CommentLike commentLike = new CommentLike();
-            Comment comment = commentService.findById(commentId).get();
-
-            commentLike.setComment(comment);
-            commentLike.setUser(user);
-            commentLike.setPositive(positive);
-            commentLikeService.save(commentLike);
-
-        }
+        ApiValidationUtil.requireNull(commentLikeService.findByCommentIdAndUserId(commentId, user.getId()), "comment does not exist");
+        CommentLike commentLike = new CommentLike();
+        commentLike.setComment(commentService.findById(commentId).get());
+        commentLike.setUser(user);
+        commentLike.setPositive(positive);
+        commentLikeService.save(commentLike);
+        return Response.ok();
     }
 
     @Operation(summary = "эндпоинт для удаления лайка или дизлайка комменту")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Лайк или дизлайк удален"),
+            @ApiResponse(responseCode = "400", description = "Клиент допустил ошибки в запросе")
+    })
     @DeleteMapping("/{commentId}")
-    public void deleteLikeIfExist(@PathVariable @Positive Long commentId, @RequestParam("positive") Boolean positive) {
+    public Response<Void> deleteLikeIfExist(@PathVariable @Positive Long commentId, @RequestParam("positive") Boolean positive) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (commentLikeService.existsByCommentIdAndUserId(commentId, user.getId())) {
-            Comment comment = commentService.findById(commentId).get();
-            List <CommentLike> likeList = commentLikeService.findAll();
-            likeList.stream()
-                    .filter(l -> l.getUser().equals(user) && l.getComment().equals(comment))
-                    .forEach(commentLikeService::delete);
-        }
+        CommentLike commentLike = commentLikeService.findByCommentIdAndUserId(commentId, user.getId());
+        ApiValidationUtil.requireNotNull(commentLike, "comment does not exist");
+        commentLikeService.delete(commentLike);
+        return Response.ok();
     }
 
     @Operation(summary = "эндпоинт для обновления лайка или дизлайка комменту")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Лайк или дизлайк обновлен"),
+            @ApiResponse(responseCode = "400", description = "Клиент допустил ошибки в запросе")
+    })
     @PutMapping("/{commentId}")
-    public void updateLikeIfExist(@PathVariable @Positive Long commentId, @RequestParam("positive") Boolean positive) {
+    public Response<Void> updateLikeIfExist(@PathVariable @Positive Long commentId, @RequestParam("positive") Boolean positive) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if( commentLikeService.existsByCommentIdAndUserId(commentId, user.getId())) {
-            Comment comment = commentService.findById(commentId).get();
-            List <CommentLike> likeList = commentLikeService.findAll();
-                likeList.stream()
-                        .filter(l -> l.getUser().equals(user) && l.getComment().equals(comment))
-                        .peek(l -> l.setPositive(positive))
-                        .forEach(commentLikeService::update);
-
-        }
+        CommentLike commentLike = commentLikeService.findByCommentIdAndUserId(commentId, user.getId());
+        ApiValidationUtil.requireNotNull(commentLike, "comment does not exist");
+        commentLikeService.update(commentLike);
+        return Response.ok();
     }
+
 
 
 
