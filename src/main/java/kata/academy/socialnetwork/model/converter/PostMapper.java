@@ -27,10 +27,12 @@ public final class PostMapper {
         return post;
     }
 
-    public static Post postUpdate(Post post, PostUpdateRequestDto dto) {
-        post.setTitle(dto.title());
-        post.setText(dto.text());
-        post.setTags(dto.tags());
+    public static Post postUpdate(Long id, PostUpdateRequestDto postUpdateRequestDto) {
+        Post post = new Post();
+        post.setId(id);
+        post.setTitle(postUpdateRequestDto.title());
+        post.setText(postUpdateRequestDto.text());
+        post.setTags(postUpdateRequestDto.tags());
 
         return post;
     }

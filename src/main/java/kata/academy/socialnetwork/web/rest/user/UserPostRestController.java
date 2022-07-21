@@ -11,6 +11,7 @@ import kata.academy.socialnetwork.model.dto.request.post.PostUpdateRequestDto;
 import kata.academy.socialnetwork.model.dto.response.post.PostResponseDto;
 import kata.academy.socialnetwork.model.entity.Post;
 import kata.academy.socialnetwork.model.entity.User;
+import kata.academy.socialnetwork.service.abst.dto.PostResponseDtoService;
 import kata.academy.socialnetwork.service.abst.entity.PostService;
 import kata.academy.socialnetwork.web.util.ApiValidationUtil;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 @Tag(name = "UserPostRestController", description = "Контроллер для работы с постами")
 @RequiredArgsConstructor
@@ -36,6 +38,7 @@ import javax.validation.Valid;
 public class UserPostRestController {
 
     private final PostService postService;
+    private final PostResponseDtoService postResponseDtoService;
 
     @Operation(summary = "Эндпоинт для получения списка постов")
     @ApiResponses(value = {
@@ -66,10 +69,15 @@ public class UserPostRestController {
     })
     @GetMapping("/{postId}")
     public Response<PostResponseDto> getPostById(@PathVariable Long postId) {
-        Post post = postService.findById(postId).orElse(null);
-        ApiValidationUtil.requireNotNull(post, "Post not found");
+        Optional<PostResponseDto> postResponseDto = null;
+        try {
+            postResponseDto = postResponseDtoService.findById(postId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ApiValidationUtil.requireFalse(postResponseDto.isPresent(), "Post not found");
 
-        return Response.ok(PostMapper.toDto(post));
+        return Response.ok(postResponseDto.get());
     }
 
     @Operation(summary = "Эндпоинт для удаления своего поста по ID")
@@ -79,13 +87,14 @@ public class UserPostRestController {
     })
     @DeleteMapping("/{postId}")
     public Response<Void> removePostById(@PathVariable Long postId) {
-        ApiValidationUtil.requireTrue(postService.existsById(postId), "Post not found");
+        Optional<PostResponseDto> postResponseDto = postResponseDtoService.findById(postId);
+        ApiValidationUtil.requireFalse(postResponseDto.isPresent(), "Post not found");
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Post post = postService.findById(postId).orElseThrow();
 
-        ApiValidationUtil.requireTrue(post.getUser().equals(user), "You are not the author of this post");
-        postService.delete(post);
+        ApiValidationUtil.requireTrue(postResponseDto.get().userResponseDto().id().equals(user.getId()),
+                "You are not the author of this post");
+        postService.deleteById(postResponseDto.get().id());
         return Response.ok();
     }
 
@@ -96,12 +105,13 @@ public class UserPostRestController {
     })
     @PutMapping
     public Response<PostResponseDto> updatePost(@RequestBody @Valid PostUpdateRequestDto dto) {
-        ApiValidationUtil.requireTrue(postService.existsById(dto.id()), "Post not found");
+        Optional<PostResponseDto> postResponseDto = postResponseDtoService.findById(dto.id());
+        ApiValidationUtil.requireFalse(postResponseDto.isPresent(), "Post not found");
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Post post = postService.findById(dto.id()).orElseThrow();
 
-        ApiValidationUtil.requireTrue(post.getUser().equals(user), "You are not the author of this post");
-        return Response.ok(PostMapper.toDto(postService.update(PostMapper.postUpdate(post, dto))));
+        ApiValidationUtil.requireTrue(postResponseDto.get().userResponseDto().id().equals(user.getId()),
+                "You are not the author of this post");
+        return Response.ok(PostMapper.toDto(postService.update(PostMapper.postUpdate(postResponseDto.get().id(), dto))));
     }
 }
