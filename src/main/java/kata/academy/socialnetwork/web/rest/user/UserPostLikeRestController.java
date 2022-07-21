@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Positive;
+import java.util.Optional;
 
 @Tag(name = "UserPostLikeRestController", description = "Контроллер для работы с лайками поста")
 @RequiredArgsConstructor
@@ -45,8 +46,9 @@ public class UserPostLikeRestController {
     @PostMapping("/{postId}")
     public Response<Void> addPostLike(@PathVariable @Positive Long postId, @RequestParam("positive") Boolean positive) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Post post = postService.findById(postId).orElse(null);
-        ApiValidationUtil.requireNotNull(post, "Post not found");
+        Optional<Post> optionalPost = postService.findById(postId);
+        ApiValidationUtil.requireTrue(optionalPost.isPresent(), "Post not found");
+        Post post = optionalPost.get();
         PostLike postLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
         ApiValidationUtil.requireNull(postLike, "Post like or dislike already exists");
         postLikeService.save(new PostLike(null, post, user, positive));
