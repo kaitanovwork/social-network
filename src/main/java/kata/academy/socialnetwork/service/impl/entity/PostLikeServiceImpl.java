@@ -5,6 +5,8 @@ import kata.academy.socialnetwork.repository.abst.entity.PostLikeRepository;
 import kata.academy.socialnetwork.service.abst.entity.PostLikeService;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class PostLikeServiceImpl extends AbstractServiceImpl<PostLike, Long> implements PostLikeService {
 
@@ -18,5 +20,10 @@ public class PostLikeServiceImpl extends AbstractServiceImpl<PostLike, Long> imp
     @Override
     public Integer countPostLikesByIdAndPositive(Long postId, Boolean positive) {
         return postLikeRepository.countPostLikesByIdAndPositive(postId, positive);
+    }
+
+    @Override
+    public Optional<PostLike> findByPostIdAndUserId(Long postId, Long userId) {
+        return postLikeRepository.findByPostIdAndUserId(postId, userId);
     }
 }
