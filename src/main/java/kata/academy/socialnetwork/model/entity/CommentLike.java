@@ -26,7 +26,7 @@ public class CommentLike {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private boolean positive;
+    private Boolean positive;
 
     @OneToOne
     @JoinColumn(name = "comment_id", referencedColumnName = "id", nullable = false)

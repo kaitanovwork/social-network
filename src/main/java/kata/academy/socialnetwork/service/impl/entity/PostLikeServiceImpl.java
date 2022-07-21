@@ -26,4 +26,9 @@ public class PostLikeServiceImpl extends AbstractServiceImpl<PostLike, Long> imp
     public Optional<PostLike> findByPostIdAndUserId(Long postId, Long userId) {
         return postLikeRepository.findByPostIdAndUserId(postId, userId);
     }
+
+    @Override
+    public boolean existsByPostIdAndUserId(Long postId, Long userId) {
+        return postLikeRepository.existsByPostIdAndUserId(postId, userId);
+    }
 }

@@ -23,7 +23,12 @@ public class CommentLikeServiceImpl extends AbstractServiceImpl<CommentLike, Lon
     }
 
     @Override
-    public Optional <CommentLike> findByCommentIdAndUserId(Long commentId, Long userId) {
+    public Optional<CommentLike> findByCommentIdAndUserId(Long commentId, Long userId) {
         return commentLikeRepository.findByCommentIdAndUserId(commentId, userId);
+    }
+
+    @Override
+    public boolean existsByCommentIdAndUserId(Long commentId, Long userId) {
+        return commentLikeRepository.existsByCommentIdAndUserId(commentId, userId);
     }
 }
