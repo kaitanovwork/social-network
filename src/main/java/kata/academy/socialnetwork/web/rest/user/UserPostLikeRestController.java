@@ -49,8 +49,8 @@ public class UserPostLikeRestController {
         Optional<Post> optionalPost = postService.findById(postId);
         ApiValidationUtil.requireTrue(optionalPost.isPresent(), "Post not found");
         Post post = optionalPost.get();
-        PostLike postLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
-        ApiValidationUtil.requireNull(postLike, "Post like or dislike already exists");
+        Optional<PostLike> optionalPostLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
+        ApiValidationUtil.requireFalse(optionalPostLike.isPresent(), "Post like or dislike already exists");
         postLikeService.save(new PostLike(null, post, user, positive));
         return Response.ok();
     }
@@ -63,8 +63,9 @@ public class UserPostLikeRestController {
     @DeleteMapping("/{postId}")
     public Response<Void> deletePostLike(@PathVariable @Positive Long postId) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        PostLike postLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
-        ApiValidationUtil.requireNotNull(postLike, "Post like or dislike not found");
+        Optional<PostLike> optionalPostLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
+        ApiValidationUtil.requireTrue(optionalPostLike.isPresent(), "Post like or dislike not found");
+        PostLike postLike = optionalPostLike.get();
         postLikeService.delete(postLike);
         return Response.ok();
     }
@@ -78,8 +79,9 @@ public class UserPostLikeRestController {
     public Response<Void> updatePostLike(@PathVariable @Positive Long postId, @RequestParam("positive") Boolean positive) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ApiValidationUtil.requireTrue(postService.existsById(postId), "Post not found");
-        PostLike postLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
-        ApiValidationUtil.requireNotNull(postLike, "Post like or dislike not found");
+        Optional<PostLike> optionalPostLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
+        ApiValidationUtil.requireTrue(optionalPostLike.isPresent(), "Post like or dislike not found");
+        PostLike postLike = optionalPostLike.get();
         postLike.setPositive(positive);
         postLikeService.save(postLike);
         return Response.ok();
