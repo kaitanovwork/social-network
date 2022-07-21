@@ -5,6 +5,8 @@ import kata.academy.socialnetwork.repository.abst.entity.CommentLikeRepository;
 import kata.academy.socialnetwork.service.abst.entity.CommentLikeService;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class CommentLikeServiceImpl extends AbstractServiceImpl<CommentLike, Long> implements CommentLikeService {
 
@@ -21,7 +23,7 @@ public class CommentLikeServiceImpl extends AbstractServiceImpl<CommentLike, Lon
     }
 
     @Override
-    public CommentLike findByCommentIdAndUserId(Long commentId, Long userId) {
+    public Optional <CommentLike> findByCommentIdAndUserId(Long commentId, Long userId) {
         return commentLikeRepository.findByCommentIdAndUserId(commentId, userId);
     }
 }

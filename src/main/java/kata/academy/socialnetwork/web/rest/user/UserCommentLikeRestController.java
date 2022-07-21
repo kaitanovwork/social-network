@@ -59,7 +59,8 @@ public class UserCommentLikeRestController {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<Comment> commentOptional = commentService.findById(commentId);
         ApiValidationUtil.requireTrue(commentOptional.isPresent(), "comment not found");
-        ApiValidationUtil.requireNull(commentLikeService.findByCommentIdAndUserId(commentId, user.getId()), "comment-like already exist");
+        Optional<CommentLike> commentLikeOptional = commentLikeService.findByCommentIdAndUserId(commentId, user.getId());
+        ApiValidationUtil.requireFalse(commentLikeOptional.isPresent(), "comment-like already exist");
         CommentLike commentLike = new CommentLike();
         commentLike.setComment(commentOptional.get());
         commentLike.setUser(user);
@@ -77,9 +78,9 @@ public class UserCommentLikeRestController {
     public Response<Void> deleteCommentLikeIfExist(@PathVariable @Positive Long commentId) {
         ApiValidationUtil.requireTrue(commentService.existsById(commentId), "comment not found");
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        CommentLike commentLike = commentLikeService.findByCommentIdAndUserId(commentId, user.getId());
-        ApiValidationUtil.requireNotNull(commentLike, "comment-like does not exist");
-        commentLikeService.delete(commentLike);
+        Optional<CommentLike> commentLikeOptional = commentLikeService.findByCommentIdAndUserId(commentId, user.getId());
+        ApiValidationUtil.requireTrue(commentLikeOptional.isPresent(), "comment-like does not exist");
+        commentLikeService.delete(commentLikeOptional.get());
         return Response.ok();
     }
 
@@ -92,8 +93,9 @@ public class UserCommentLikeRestController {
     public Response<Void> updateCommentLikeIfExist(@PathVariable @Positive Long commentId, @RequestParam("positive") Boolean positive) {
         ApiValidationUtil.requireTrue(commentService.existsById(commentId), "comment not found");
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        CommentLike commentLike = commentLikeService.findByCommentIdAndUserId(commentId, user.getId());
-        ApiValidationUtil.requireNotNull(commentLike, "comment-like does not exist");
+        Optional<CommentLike> commentLikeOptional = commentLikeService.findByCommentIdAndUserId(commentId, user.getId());
+        ApiValidationUtil.requireTrue(commentLikeOptional.isPresent(), "comment-like does not exist");
+        CommentLike commentLike = commentLikeOptional.get();
         commentLike.setPositive(positive);
         commentLikeService.update(commentLike);
         return Response.ok();
