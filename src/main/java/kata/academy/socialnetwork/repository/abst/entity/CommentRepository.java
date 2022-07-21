@@ -11,6 +11,10 @@ import org.springframework.data.repository.query.Param;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @EntityGraph(attributePaths = {"post", "user"})
-    @Query(value = "select c from Comment as c where c.post.id = :postId")
-    Page<Comment> getCommentsByPostId(@Param("postId") Long postId, Pageable pageable);
+    @Query("""
+            SELECT c
+            FROM Comment c
+            WHERE c.post.id = :postId
+            """)
+    Page<Comment> getCommentPageByPostId(@Param("postId") Long postId, Pageable pageable);
 }

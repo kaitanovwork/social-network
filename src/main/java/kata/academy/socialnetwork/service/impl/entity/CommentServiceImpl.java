@@ -8,7 +8,6 @@ import kata.academy.socialnetwork.service.abst.entity.CommentService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CommentServiceImpl extends AbstractServiceImpl<Comment, Long> implements CommentService {
@@ -20,8 +19,7 @@ public class CommentServiceImpl extends AbstractServiceImpl<Comment, Long> imple
         this.commentRepository = commentRepository;
     }
 
-    @Transactional(readOnly = true)
-    public Page<CommentResponseDto> getCommentsByPostId(Long postId, Pageable pageable) {
-        return commentRepository.getCommentsByPostId(postId, pageable).map(CommentMapper::toDto);
+    public Page<CommentResponseDto> getCommentPageByPostId(Long postId, Pageable pageable) {
+        return commentRepository.getCommentPageByPostId(postId, pageable).map(CommentMapper::toDto);
     }
 }

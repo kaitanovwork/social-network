@@ -7,6 +7,9 @@ import kata.academy.socialnetwork.model.entity.User;
 
 public final class PostMapper {
 
+    private PostMapper(){
+    }
+
     public static PostResponseDto toDto(Post post) {
         return new PostResponseDto(
                 post.getId(),
