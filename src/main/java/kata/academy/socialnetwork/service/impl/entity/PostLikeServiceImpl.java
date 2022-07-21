@@ -19,7 +19,7 @@ public class PostLikeServiceImpl extends AbstractServiceImpl<PostLike, Long> imp
 
     @Override
     public Integer countPostLikesByIdAndPositive(Long postId, Boolean positive) {
-        return postLikeRepository.countPostLikesByIdAndPositive(postId, positive);
+        return postLikeRepository.countByPostIdAndPositive(postId, positive);
     }
 
     @Override
