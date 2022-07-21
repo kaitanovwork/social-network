@@ -9,6 +9,9 @@ import kata.academy.socialnetwork.model.entity.UserInfo;
 
 public final class UserMapper {
 
+    private UserMapper(){
+    }
+
     public static User toEntity(UserPersistRequestDto dto) {
         User user = new User();
         user.setEmail(dto.email());

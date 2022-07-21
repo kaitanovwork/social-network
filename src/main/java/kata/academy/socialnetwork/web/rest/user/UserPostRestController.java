@@ -14,7 +14,6 @@ import kata.academy.socialnetwork.service.abst.entity.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,7 +37,7 @@ public class UserPostRestController {
             @ApiResponse(responseCode = "400", description = "Клиент допустил ошибки в запросе")
     })
     @GetMapping
-    public Response<Page<PostResponseDto>> getPostPage(@PageableDefault(sort = "id") Pageable pageable) {
+    public Response<Page<PostResponseDto>> getPostPage(Pageable pageable) {
         Page<Post> posts = postService.findAll(pageable);
         return Response.ok(posts.map(PostMapper::toDto));
     }
