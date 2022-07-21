@@ -8,5 +8,7 @@ public interface PostLikeService extends AbstractService<PostLike, Long> {
 
     Integer countPostLikesByIdAndPositive(Long postId, Boolean positive);
 
-    Optional<PostLike> findByPostIdAndUserId(Long post, Long user);
+    Optional<PostLike> findByPostIdAndUserId(Long postId, Long userId);
+
+    boolean existsByPostIdAndUserId(Long postId, Long userId);
 }

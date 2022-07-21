@@ -4,8 +4,11 @@ import kata.academy.socialnetwork.model.entity.CommentLike;
 
 import java.util.Optional;
 
+public interface CommentLikeService extends AbstractService<CommentLike, Long> {
 
-public interface CommentLikeService  extends AbstractService<CommentLike, Long>  {
     Integer countCommentLikesByIdAndPositive(Long commentId, Boolean positive);
-    Optional <CommentLike> findByCommentIdAndUserId(Long commentId, Long userId);
+
+    Optional<CommentLike> findByCommentIdAndUserId(Long commentId, Long userId);
+
+    boolean existsByCommentIdAndUserId(Long commentId, Long userId);
 }

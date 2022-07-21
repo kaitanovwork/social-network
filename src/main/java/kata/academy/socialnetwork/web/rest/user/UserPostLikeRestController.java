@@ -13,7 +13,14 @@ import kata.academy.socialnetwork.service.abst.entity.PostService;
 import kata.academy.socialnetwork.web.util.ApiValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.Positive;
 import java.util.Optional;
@@ -48,10 +55,8 @@ public class UserPostLikeRestController {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<Post> optionalPost = postService.findById(postId);
         ApiValidationUtil.requireTrue(optionalPost.isPresent(), "Post not found");
-        Post post = optionalPost.get();
-        Optional<PostLike> optionalPostLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
-        ApiValidationUtil.requireFalse(optionalPostLike.isPresent(), "Post like or dislike already exists");
-        postLikeService.save(new PostLike(null, post, user, positive));
+        ApiValidationUtil.requireFalse(postLikeService.existsByPostIdAndUserId(postId, user.getId()), "Post like or dislike already exists");
+        postLikeService.save(new PostLike(null, optionalPost.get(), user, positive));
         return Response.ok();
     }
 
@@ -65,8 +70,7 @@ public class UserPostLikeRestController {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<PostLike> optionalPostLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
         ApiValidationUtil.requireTrue(optionalPostLike.isPresent(), "Post like or dislike not found");
-        PostLike postLike = optionalPostLike.get();
-        postLikeService.delete(postLike);
+        postLikeService.delete(optionalPostLike.get());
         return Response.ok();
     }
 
@@ -78,7 +82,6 @@ public class UserPostLikeRestController {
     @PutMapping("/{postId}")
     public Response<Void> updatePostLike(@PathVariable @Positive Long postId, @RequestParam("positive") Boolean positive) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        ApiValidationUtil.requireTrue(postService.existsById(postId), "Post not found");
         Optional<PostLike> optionalPostLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
         ApiValidationUtil.requireTrue(optionalPostLike.isPresent(), "Post like or dislike not found");
         PostLike postLike = optionalPostLike.get();
