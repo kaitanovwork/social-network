@@ -45,8 +45,8 @@ public class UserPostLikeRestController {
     @PostMapping("/{postId}")
     public Response<Void> addPostLike(@PathVariable @Positive Long postId, @RequestParam("positive") Boolean positive) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        ApiValidationUtil.requireTrue(postService.existsById(postId), "Post not found");
-        Post post = postService.findById(postId).get();
+        Post post = postService.findById(postId).orElse(null);
+        ApiValidationUtil.requireNotNull(post, "Post not found");
         PostLike postLike = postLikeService.findByPostIdAndUserId(postId, user.getId());
         ApiValidationUtil.requireNull(postLike, "Post like or dislike already exists");
         postLikeService.save(new PostLike(null, post, user, positive));
