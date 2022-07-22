@@ -69,15 +69,10 @@ public class UserPostRestController {
     })
     @GetMapping("/{postId}")
     public Response<PostResponseDto> getPostById(@PathVariable Long postId) {
-        Optional<PostResponseDto> postResponseDto = null;
-        try {
-            postResponseDto = postResponseDtoService.findById(postId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        ApiValidationUtil.requireFalse(postResponseDto.isPresent(), "Post not found");
+        Optional<PostResponseDto> postResponseDtoOptional = postResponseDtoService.findById(postId);
+        ApiValidationUtil.requireTrue(postResponseDtoOptional.isPresent(), "Post not found");
 
-        return Response.ok(postResponseDto.get());
+        return Response.ok(postResponseDtoOptional.get());
     }
 
     @Operation(summary = "Эндпоинт для удаления своего поста по ID")
@@ -87,14 +82,15 @@ public class UserPostRestController {
     })
     @DeleteMapping("/{postId}")
     public Response<Void> removePostById(@PathVariable Long postId) {
-        Optional<PostResponseDto> postResponseDto = postResponseDtoService.findById(postId);
-        ApiValidationUtil.requireFalse(postResponseDto.isPresent(), "Post not found");
+        Optional<PostResponseDto> postResponseDtoOptional = postResponseDtoService.findById(postId);
+        ApiValidationUtil.requireTrue(postResponseDtoOptional.isPresent(), "Post not found");
+        PostResponseDto postDto = postResponseDtoOptional.get();
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        ApiValidationUtil.requireTrue(postResponseDto.get().userResponseDto().id().equals(user.getId()),
+        ApiValidationUtil.requireTrue(postDto.userResponseDto().id().equals(user.getId()),
                 "You are not the author of this post");
-        postService.deleteById(postResponseDto.get().id());
+        postService.deleteById(postDto.id());
         return Response.ok();
     }
 
@@ -105,13 +101,14 @@ public class UserPostRestController {
     })
     @PutMapping
     public Response<PostResponseDto> updatePost(@RequestBody @Valid PostUpdateRequestDto dto) {
-        Optional<PostResponseDto> postResponseDto = postResponseDtoService.findById(dto.id());
-        ApiValidationUtil.requireFalse(postResponseDto.isPresent(), "Post not found");
+        Optional<PostResponseDto> postResponseDtoOptional = postResponseDtoService.findById(dto.id());
+        ApiValidationUtil.requireTrue(postResponseDtoOptional.isPresent(), "Post not found");
+        PostResponseDto postDto = postResponseDtoOptional.get();
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        ApiValidationUtil.requireTrue(postResponseDto.get().userResponseDto().id().equals(user.getId()),
+        ApiValidationUtil.requireTrue(postDto.userResponseDto().id().equals(user.getId()),
                 "You are not the author of this post");
-        return Response.ok(PostMapper.toDto(postService.update(PostMapper.postUpdate(postResponseDto.get().id(), dto))));
+        return Response.ok(PostMapper.toDto(postService.update(PostMapper.postUpdate(user, dto))));
     }
 }

@@ -12,7 +12,7 @@ public interface PostResponseDtoRepository extends JpaRepository<Post, Long> {
 
     @Query(
             """
-            SELECT new kata.academy.socialnetwork.model.dto.response.post.PostResponseDto(p.id, p.title, p.text, p.tags, p.user)
+            SELECT new kata.academy.socialnetwork.model.dto.response.post.PostResponseDto(p)
             FROM Post p
             WHERE p.id = :postId
             """
