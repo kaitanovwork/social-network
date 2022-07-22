@@ -1,5 +1,3 @@
-TRUNCATE roles, users, posts, post_likes RESTART IDENTITY CASCADE;
-
 INSERT INTO roles (id, name)
 VALUES (101, 'USER');
 
