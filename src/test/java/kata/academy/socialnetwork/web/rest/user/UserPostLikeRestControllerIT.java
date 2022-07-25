@@ -15,14 +15,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class UserPostLikeRestControllerTest extends SpringSimpleContextTest {
+public class UserPostLikeRestControllerIT extends SpringSimpleContextTest {
 
     @Test
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD,
             value = "/scripts/user/UserPostLikeRestController/getPostLikeCount_PostNotFoundTest/BeforeTest.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD,
             value = "/scripts/user/UserPostLikeRestController/getPostLikeCount_PostNotFoundTest/AfterTest.sql")
-    void getPostLikeCount_PostNotFoundTest() throws Exception {
+    public void getPostLikeCount_PostNotFoundTest() throws Exception {
         String token = getToken("user", "user");
         mockMvc.perform(get("/api/v1/user/post-likes/103/count?positive=true")
                         .header("Authorization", token)
