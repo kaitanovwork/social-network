@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 
+import static org.junit.Assert.assertEquals;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
@@ -79,15 +81,14 @@ public class UserCommentLikeRestControllerIT extends SpringSimpleContextTest {
     @Test
     public void addCommentLike_SuccessfulTest() throws Exception {
         String token = getToken("user", "user");
-
-        mockMvc.perform(post("/api/v1/user/comment-likes/101?positive=true")
+       mockMvc.perform(post("/api/v1/user/comment-likes/101?positive=true")
                         .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.success", Is.is(true)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code", Is.is(200)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data", IsNull.nullValue()));
-
-    }
+        assertEquals(entityManager.createNativeQuery("select * from comment_likes where user_id = 101 and comment_id = 101 and positive = true").getResultList().size(), 1);
+      }
 
 
     @Test
@@ -137,6 +138,7 @@ public class UserCommentLikeRestControllerIT extends SpringSimpleContextTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.success", Is.is(true)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code", Is.is(200)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data", IsNull.nullValue()));
+        assertEquals(entityManager.createNativeQuery("select * from comment_likes where user_id = 101 and comment_id = 101 and positive = true").getResultList().size(), 0);
     }
 
 
@@ -185,6 +187,7 @@ public class UserCommentLikeRestControllerIT extends SpringSimpleContextTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.success", Is.is(true)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code", Is.is(200)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data", IsNull.nullValue()));
+        assertEquals(entityManager.createNativeQuery("select * from comment_likes where user_id = 101 and comment_id = 101 and positive = false").getResultList().size(), 1);
     }
 
 
