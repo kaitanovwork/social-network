@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
-    Integer countPostLikesByIdAndPositive(Long postId, Boolean positive);
+    Integer countByPostIdAndPositive(Long postId, Boolean positive);
 
     Optional<PostLike> findByPostIdAndUserId(Long postId, Long userId);
 
