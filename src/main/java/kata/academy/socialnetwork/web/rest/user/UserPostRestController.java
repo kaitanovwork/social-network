@@ -58,7 +58,7 @@ public class UserPostRestController {
     @PostMapping
     public Response<PostResponseDto> addPost(@RequestBody @Valid PostPersistRequestDto dto) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return Response.ok(PostMapper.toDto(postService.save(PostMapper.toEntity(dto, user))));
+        return Response.ok(PostMapper.toDto(postService.save(PostMapper.toEntity(user, dto))));
     }
 
     @Operation(summary = "Эндпоинт для получения поста по его ID")
@@ -70,7 +70,6 @@ public class UserPostRestController {
     public Response<PostResponseDto> getPostById(@PathVariable Long postId) {
         Optional<PostResponseDto> postResponseDtoOptional = postResponseDtoService.findById(postId);
         ApiValidationUtil.requireTrue(postResponseDtoOptional.isPresent(), "Post not found");
-
         return Response.ok(postResponseDtoOptional.get());
     }
 
@@ -81,15 +80,12 @@ public class UserPostRestController {
     })
     @DeleteMapping("/{postId}")
     public Response<Void> removePostById(@PathVariable Long postId) {
-        Optional<PostResponseDto> postResponseDtoOptional = postResponseDtoService.findById(postId);
-        ApiValidationUtil.requireTrue(postResponseDtoOptional.isPresent(), "Post not found");
-        PostResponseDto postDto = postResponseDtoOptional.get();
-
+        Optional<Post> postOptional = postService.findById(postId);
+        ApiValidationUtil.requireTrue(postOptional.isPresent(), "Post not found");
+        Post post = postOptional.get();
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        ApiValidationUtil.requireTrue(postDto.userResponseDto().id().equals(user.getId()),
-                "You are not the author of this post");
-        postService.deleteById(postDto.id());
+        ApiValidationUtil.requireTrue(post.getUser().equals(user), "You are not the author of this post");
+        postService.delete(post);
         return Response.ok();
     }
 
@@ -100,14 +96,11 @@ public class UserPostRestController {
     })
     @PutMapping
     public Response<PostResponseDto> updatePost(@RequestBody @Valid PostUpdateRequestDto dto) {
-        Optional<PostResponseDto> postResponseDtoOptional = postResponseDtoService.findById(dto.id());
-        ApiValidationUtil.requireTrue(postResponseDtoOptional.isPresent(), "Post not found");
-        PostResponseDto postDto = postResponseDtoOptional.get();
-
+        Optional<Post> postOptional = postService.findById(dto.id());
+        ApiValidationUtil.requireTrue(postOptional.isPresent(), "Post not found");
+        Post post = postOptional.get();
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        ApiValidationUtil.requireTrue(postDto.userResponseDto().id().equals(user.getId()),
-                "You are not the author of this post");
-        return Response.ok(PostMapper.toDto(postService.update(PostMapper.postUpdate(user, dto))));
+        ApiValidationUtil.requireTrue(post.getUser().equals(user), "You are not the author of this post");
+        return Response.ok(PostMapper.toDto(postService.update(PostMapper.postUpdate(post, dto))));
     }
 }

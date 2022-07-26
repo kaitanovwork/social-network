@@ -10,8 +10,7 @@ import java.util.Optional;
 
 public interface PostResponseDtoRepository extends JpaRepository<Post, Long> {
 
-    @Query(
-            """
+    @Query("""
             SELECT new kata.academy.socialnetwork.model.dto.response.post.PostResponseDto(p)
             FROM Post p
             WHERE p.id = :postId

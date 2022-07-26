@@ -7,5 +7,8 @@ VALUES (101, 'user', 'user', 'user', '$2a$12$4u1tSnYIkFdXX1Lh.hEwyOqORMPMI7lLap1
 INSERT INTO posts (id, text, title, user_id)
 VALUES (101, 'post text', 'post title', 101);
 
-INSERT INTO post_likes (id, positive, post_id, user_id)
-VALUES (101, true, 101, 101)
+INSERT INTO comments (id, text, user_id, post_id)
+VALUES (101, 'comment that should be negative', 101, 101);
+
+INSERT INTO comment_likes (id, positive, comment_id, user_id)
+VALUES (101, false, 101, 101);

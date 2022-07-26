@@ -21,7 +21,7 @@ public final class PostMapper {
         );
     }
 
-    public static Post toEntity(PostPersistRequestDto dto, User user) {
+    public static Post toEntity(User user, PostPersistRequestDto dto) {
         Post post = new Post();
         post.setTitle(dto.title());
         post.setText(dto.text());
@@ -30,14 +30,10 @@ public final class PostMapper {
         return post;
     }
 
-    public static Post postUpdate(User user, PostUpdateRequestDto postUpdateRequestDto) {
-        Post post = new Post();
-        post.setId(postUpdateRequestDto.id());
-        post.setTitle(postUpdateRequestDto.title());
-        post.setText(postUpdateRequestDto.text());
-        post.setTags(postUpdateRequestDto.tags());
-        post.setUser(user);
-
+    public static Post postUpdate(Post post, PostUpdateRequestDto dto) {
+        post.setTitle(dto.title());
+        post.setText(dto.text());
+        post.setTags(dto.tags());
         return post;
     }
 }
