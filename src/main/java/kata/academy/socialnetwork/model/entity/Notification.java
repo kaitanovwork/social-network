@@ -21,7 +21,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-@Table(name = "notification")
+@Table(name = "notifications")
 public class Notification {
 
     @Id
