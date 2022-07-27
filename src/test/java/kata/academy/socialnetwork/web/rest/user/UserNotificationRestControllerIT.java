@@ -24,6 +24,7 @@ public class UserNotificationRestControllerIT extends SpringSimpleContextTest {
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.success", Is.is(true)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code", Is.is(200)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.pageable.paged", Is.is(true)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.content[0].text", Is.is("notification text of true")));
 
 
@@ -42,6 +43,7 @@ public class UserNotificationRestControllerIT extends SpringSimpleContextTest {
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.success", Is.is(true)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code", Is.is(200)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.pageable.paged", Is.is(true)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.content[0].text", Is.is("notification text of false")));
     }
 
@@ -52,14 +54,14 @@ public class UserNotificationRestControllerIT extends SpringSimpleContextTest {
     @Test
     public void getNotificationPage_SuccessfulEmptyValueTest() throws Exception{
         String token = getToken("user", "user");
-        mockMvc.perform(get("/api/v1/user/notifications")
+        mockMvc.perform(get("/api/v1/user/notifications?page=0&size=1")
                         .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.success", Is.is(true)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code", Is.is(200)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.content[0].text", Is.is("notification text of true")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data.content[1].text", Is.is("notification text of false")));
-
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.pageable.paged", Is.is(true)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.totalPages", Is.is(2)));
     }
 
 
