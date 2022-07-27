@@ -2,7 +2,6 @@ package kata.academy.socialnetwork.web.rest.user;
 
 import kata.academy.socialnetwork.SpringSimpleContextTest;
 import kata.academy.socialnetwork.model.dto.request.user.UserPersistRequestDto;
-import kata.academy.socialnetwork.model.entity.User;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Test;
@@ -11,24 +10,24 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static kata.academy.socialnetwork.model.enums.Gender.FEMALE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class UserRegistrationRestControllerIT extends SpringSimpleContextTest {
+
+public class UserRegistrationRestControllerIT extends SpringSimpleContextTest {
 
     @Test
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD,
             value = "/scripts/user/UserRegistrationRestController/registerNewUser_SuccessfulTest/BeforeTest.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD,
             value = "/scripts/user/UserRegistrationRestController/registerNewUser_SuccessfulTest/AfterTest.sql")
-    void registerNewUser_SuccessfulTest() throws Exception {
+    public void registerNewUser_SuccessfulTest() throws Exception {
 
-        var request = new UserPersistRequestDto(
+        UserPersistRequestDto dto = new UserPersistRequestDto(
                 "mary@gmail.com",
                 "123",
                 "Mary",
@@ -40,31 +39,29 @@ class UserRegistrationRestControllerIT extends SpringSimpleContextTest {
 
         mockMvc.perform(post("/api/v1/registration")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success", Is.is(true)))
-                .andExpect(jsonPath("$.code", Is.is(200)))
-                .andExpect(jsonPath("$.data").exists())
-                .andExpect(jsonPath("$.data.id").isNotEmpty())
-                .andExpect(jsonPath("$.data.email", Is.is(request.email())))
-                .andExpect(jsonPath("$.data.firstName", Is.is(request.firstName())))
-                .andExpect(jsonPath("$.data.lastName", Is.is(request.lastName())))
-                .andExpect(jsonPath("$.data.city", Is.is(request.city())))
-                .andExpect(jsonPath("$.data.age", Is.is(request.age())))
-                .andExpect(jsonPath("$.data.gender", Is.is(request.gender().name())));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.success", Is.is(true)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code", Is.is(200)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.email", Is.is(dto.email())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.firstName", Is.is(dto.firstName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.lastName", Is.is(dto.lastName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.city", Is.is(dto.city())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.age", Is.is(dto.age())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.gender", Is.is(dto.gender().name())));
 
-        var user = entityManager.createQuery("SELECT u FROM User as u WHERE u.email = :email", User.class)
-                .setParameter("email", request.email())
+        var isUserExists = entityManager.createQuery(
+                "SELECT " +
+                        "CASE WHEN COUNT(u.id) > 0 THEN TRUE ELSE FALSE END " +
+                        "FROM User as u WHERE u.email = :email",
+                        Boolean.class
+                )
+                .setParameter("email", dto.email())
                 .getSingleResult();
-        assertNotNull(user);
-        assertNotNull(user.getId());
-        assertNotNull(user.getPassword());
-        assertEquals(request.email(), user.getEmail());
-        assertEquals(request.firstName(), user.getUserInfo().getFirstName());
-        assertEquals(request.lastName(), user.getUserInfo().getLastName());
-        assertEquals(request.city(), user.getUserInfo().getCity());
-        assertEquals(request.age(), user.getUserInfo().getAge());
-        assertEquals(request.gender(), user.getUserInfo().getGender());
+
+        assertTrue(isUserExists);
     }
 
     @Test
@@ -72,8 +69,8 @@ class UserRegistrationRestControllerIT extends SpringSimpleContextTest {
             value = "/scripts/user/UserRegistrationRestController/registerNewUser_WithExistingUsernameTest/BeforeTest.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD,
             value = "/scripts/user/UserRegistrationRestController/registerNewUser_WithExistingUsernameTest/AfterTest.sql")
-    void registerNewUser_WithExistingUsernameTest() throws Exception {
-        var request = new UserPersistRequestDto(
+    public void registerNewUser_WithExistingUsernameTest() throws Exception {
+        UserPersistRequestDto dto = new UserPersistRequestDto(
                 "test@gmail.com",
                 "123",
                 "Mary",
@@ -85,19 +82,23 @@ class UserRegistrationRestControllerIT extends SpringSimpleContextTest {
 
         mockMvc.perform(post("/api/v1/registration")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success", Is.is(false)))
-                .andExpect(jsonPath("$.code", Is.is(400)))
-                .andExpect(jsonPath("$.error", Is.is("Email is being used by another user")))
-                .andExpect(jsonPath("$.data").doesNotExist());
+                .andExpect(MockMvcResultMatchers.jsonPath("$.success", Is.is(false)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code", Is.is(400)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error", Is.is("Email is being used by another user")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data").doesNotExist());
     }
 
     @ParameterizedTest
     @NullSource
     @ValueSource(strings = {"", " "})
-    void registerNewUser_EmailAndPasswordIsEmptyTest(String value) throws Exception {
-        var request = new UserPersistRequestDto(
+    @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD,
+            value = "/scripts/user/UserRegistrationRestController/registerNewUser_EmailAndPasswordIsEmptyTest/BeforeTest.sql")
+    @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD,
+            value = "/scripts/user/UserRegistrationRestController/registerNewUser_EmailAndPasswordIsEmptyTest/AfterTest.sql")
+    public void registerNewUser_EmailAndPasswordIsEmptyTest(String value) throws Exception {
+        UserPersistRequestDto dto = new UserPersistRequestDto(
                 value,
                 value,
                 "Mary",
@@ -109,11 +110,11 @@ class UserRegistrationRestControllerIT extends SpringSimpleContextTest {
 
         mockMvc.perform(post("/api/v1/registration")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success", Is.is(false)))
-                .andExpect(jsonPath("$.code", Is.is(400)))
-                .andExpect(jsonPath("$.error").value(StringContains.containsString("В теле запроса допущены ошибки в следующих полях:")))
-                .andExpect(jsonPath("$.data").doesNotExist());
+                .andExpect(MockMvcResultMatchers.jsonPath("$.success", Is.is(false)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code", Is.is(400)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error").value(StringContains.containsString("В теле запроса допущены ошибки в следующих полях:")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data").doesNotExist());
     }
 }

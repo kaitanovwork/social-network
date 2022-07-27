@@ -14,13 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class UserRestControllerIT extends SpringSimpleContextTest {
+public class UserRestControllerIT extends SpringSimpleContextTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -30,8 +30,8 @@ class UserRestControllerIT extends SpringSimpleContextTest {
             value = "/scripts/user/UserRestController/updateUser_SuccessfulTest/BeforeTest.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD,
             value = "/scripts/user/UserRestController/updateUser_SuccessfulTest/AfterTest.sql")
-    void updateUser_SuccessfulTest() throws Exception {
-        var request = new UserUpdateRequestDto(
+    public void updateUser_SuccessfulTest() throws Exception {
+        UserUpdateRequestDto dto = new UserUpdateRequestDto(
                 "NewFirstName",
                 "LastName",
                 "My city",
@@ -43,16 +43,16 @@ class UserRestControllerIT extends SpringSimpleContextTest {
         mockMvc.perform(put("/api/v1/user")
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success", Is.is(true)))
-                .andExpect(jsonPath("$.code", Is.is(200)))
-                .andExpect(jsonPath("$.data").exists())
-                .andExpect(jsonPath("$.data.firstName", Is.is(request.firstName())))
-                .andExpect(jsonPath("$.data.lastName", Is.is(request.lastName())))
-                .andExpect(jsonPath("$.data.age", Is.is(request.age())))
-                .andExpect(jsonPath("$.data.city", Is.is(request.city())))
-                .andExpect(jsonPath("$.data.gender", Is.is(request.gender().name())));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.success", Is.is(true)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code", Is.is(200)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.firstName", Is.is(dto.firstName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.lastName", Is.is(dto.lastName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.age", Is.is(dto.age())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.city", Is.is(dto.city())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.gender", Is.is(dto.gender().name())));
     }
 
     @Test
@@ -60,23 +60,23 @@ class UserRestControllerIT extends SpringSimpleContextTest {
             value = "/scripts/user/UserRestController/updateUserPassword_SuccessfulTest/BeforeTest.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD,
             value = "/scripts/user/UserRestController/updateUserPassword_SuccessfulTest/AfterTest.sql")
-    void updateUserPassword_SuccessfulTest() throws Exception {
-        var existUser = entityManager.find(User.class, 101L);
+    public void updateUserPassword_SuccessfulTest() throws Exception {
+        User existUser = entityManager.find(User.class, 101L);
 
-        var request = new UserUpdatePasswordRequestDto("12345");
+        UserUpdatePasswordRequestDto dto = new UserUpdatePasswordRequestDto("12345");
         String token = getToken("test", "test");
         mockMvc.perform(put("/api/v1/user/password")
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success", Is.is(true)))
-                .andExpect(jsonPath("$.code", Is.is(200)))
-                .andExpect(jsonPath("$.data").exists())
-                .andExpect(jsonPath("$.data.id").value(existUser.getId()));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.success", Is.is(true)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code", Is.is(200)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(existUser.getId()));
 
         existUser = entityManager.find(User.class, 101L);
-        assertTrue(passwordEncoder.matches(request.password(), existUser.getPassword()));
+        assertTrue(passwordEncoder.matches(dto.password(), existUser.getPassword()));
     }
 
     @ParameterizedTest
@@ -86,16 +86,16 @@ class UserRestControllerIT extends SpringSimpleContextTest {
             value = "/scripts/user/UserRestController/updateUserPassword_PasswordIsEmptyTest/BeforeTest.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD,
             value = "/scripts/user/UserRestController/updateUserPassword_PasswordIsEmptyTest/AfterTest.sql")
-    void updateUserPassword_PasswordIsEmptyTest(String password) throws Exception {
-        var request = new UserUpdatePasswordRequestDto(password);
+    public void updateUserPassword_PasswordIsEmptyTest(String password) throws Exception {
+        UserUpdatePasswordRequestDto dto = new UserUpdatePasswordRequestDto(password);
         String token = getToken("test", "test");
         mockMvc.perform(put("/api/v1/user/password")
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success", Is.is(false)))
-                .andExpect(jsonPath("$.code", Is.is(400)))
-                .andExpect(jsonPath("$.error", Is.is("В теле запроса допущены ошибки в следующих полях: [password]")));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.success", Is.is(false)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code", Is.is(400)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error", Is.is("В теле запроса допущены ошибки в следующих полях: [password]")));
     }
 }
